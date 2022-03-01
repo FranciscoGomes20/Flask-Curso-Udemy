@@ -1,4 +1,3 @@
-from crypt import methods
 from flask import render_template, request
 from app import app, db
 from app.models.tables import Pessoa

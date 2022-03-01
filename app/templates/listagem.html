@@ -17,12 +17,100 @@
     crossorigin="anonymous"></script>
 </head>
 <body>
-    <p>Listagem</p>
-    <p>Orgem: {{ ordem }}</p>
-    <ul>
-        {% for pessoa in pessoas %}
-            <li>ID: {{ pessoa.id }} - nome: {{ pessoa.nome }} - idade: {{ pessoa.id }} - sexo: {{ pessoa.sexo }} - salario: {{ pessoa.salario }}</li>
-        {% endfor %}
-    </ul>
+    <nav class="navbar navbar-expand-sm bg-dark">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/listagem">Listagem</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/insercao">Novo</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/graficos">Graficos</a>
+            </li>
+        </ul>
+    </nav>
+    <br>
+    <div class="container">
+        <h2>Listagem</h2>
+        <form action="/consulta" method="POST" name="frm_consulta" class="ml-3">
+            <div class="form-group">
+                <div class="row">
+                    <input type="text" class="form-control col-md-5" name="consulta" placeholder="Digite aqui a sua consulta">
+                    <select class="form-control col-md-2" name="campo">
+                        <option value="nome">Nome</option>
+                        <option value="idade">Idade</option>
+                        <option value="sexo">Sexo</option>
+                        <option value="Salario">Salario</option>
+                    </select>
+                    <button type="submit" class="btn btn-success">Consultar</button>
+                </div>
+            </div>
+        </form>
+        <div style="overflow: scroll; height: 310px; width: 100%;" align="center"> 
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th><a href="/ordenação/id/{{ordem}}">ID</a></th>
+                        <th><a href="/ordenação/nome/{{ordem}}">Nome</a></th>
+                        <th><a href="/ordenação/idade/{{ordem}}">Idade</a></th>
+                        <th><a href="/ordenação/sexo/{{ordem}}">Sexo</a></th>
+                        <th><a href="/ordenação/salario/{{ordem}}">Salario</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pessoa in pessoas %}
+                        <tr>
+                            <td nowrap="true">
+                                <a href="/selecao/{{pessoa.id}}">{{pessoa.id}}</a>
+                            </td>
+                            <td nowrap="true">{{pessoa.nome}}</td>
+                            <td nowrap="true">{{pessoa.idade}}</td>
+                            <td nowrap="true">{{pessoa.sexo}}</td>
+                            <td nowrap="true">{{pessoa.salario}}</td>
+                            <td>
+                                <a href="/edicao/{{pessoa.id}}" class="btn btn-primary" role="button">
+                                    Editor
+                                </a>
+                                <a href="/deletar/{{pessoa.id}}" class="btn btn-danger" role="button">
+                                    Deletar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="#" style="float: right;" onclick="relatorio()">Imprimir Relatorio</a>
+        <textarea id="dados" style="display: none;">
+            {% for pessoa in pessoas %}
+                {{pessoa.nome}}/{{pessoa.idade}}/{{pessoa.sexo}}/{{pessoa.salario}}#
+            {% endfor %}
+        </textarea>
+        <script>
+            function relatorio() {
+                const doc = new jsPDF({orientation: 'landscape'});
+
+                const texto = document.getElementById('dados').innerText;
+                const arrLinhas = texto.split('#')
+                let conteudo = 'Relatorio de pessoas\n\n';
+                for(let linha=0; linha<arrLinhas.length; linha++) {
+                    let arrColunas = arrLinhas[linha].split('/');
+                    arrColunas[0] = arrColunas[0].trim().padEnd(35, '*');
+                    if(arrColunas[0].indexOf('*' > 0)) {
+                        conteudo += 'NOME: ${arrColunas[0]} - '+
+                                    'IDADE: ${arrColunas[1]} - '+
+                                    'SEXO: ${arrColunas[2]} - '+
+                                    'SALARIO: ${arrColunas[3]}\n';
+                    }
+                }
+
+                doc.setFontSize(12)
+                doc.setFont('Courier');
+                doc.texto(conteudo, 30, 30)
+                doc.save('relatorio.pdf')
+            }
+        </script>
+    </div>
 </body>
 </html>
